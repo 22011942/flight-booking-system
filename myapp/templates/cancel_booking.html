@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Cancel Booking</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <style>
+            section{
+                 padding: 60px 0;
+            }
+        </style>
+    </head>
+<body>
+    <section class="py-5">
+        <div class="container-lg">
+            <div class="d-flex justify-content-center align-items-center vh-100">
+                <div class="row justify-content-center text-center">
+                    <div class="display-2"><i class="bi bi-x-circle" style="color: red"></i></div>
+                    <h2 class="text-center mb-4">Cancel Booking</h2>
+                    <p class="text-center text-muted">Are you sure you want to cancel the booking with reference: {{ booking.booking_reference }}?</p>
+                    <p class="my-1">Booking information: </p>
+                    <p class="my-1">Route: {{ booking.schedule.route }}</p>
+                    <p class="my-1">Departure Date: {{ departure_date }}</p>
+                    <p class="my-1">Day: {{ booking.schedule.get_day_of_week_display }} </p>
+                    <p class="my-1">Departure: {{ departure_time_adjusted}} ({{ departure_timezone }})</p>
+                    <p class="my-1">Arrival: {{ arrival_time_adjusted }} ({{ arrival_timezone }})</p>
+                    <div class="col-md-4 text-center">
+                        <a href="{% url 'frontpage' %}" class="btn btn-success btn my-1">No, go back</a>
+                        <form method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn my-1">Yes, Cancel Booking</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

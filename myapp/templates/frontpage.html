@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Airline Booking System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        section{
+             padding: 60px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class = "container-xxl border-bottom">
+        <div>
+          <h1 class="text-secondary fs-4 text-center">Dairy Flat Airlines</h1>
+        </div>
+    </div>
+
+    <section id="intro" class="bg-primary-subtle">
+        <div class="container-lg">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-md-7 text-center text-md-start">
+                    <h1>
+                        <div class="display-4">Welcome to Dairy Flat Airlines</div>
+                        <div class="display-6 text-muted">Book your next adventure with us!</div>
+                    </h1>
+                    <p class="lead my-4 text-muted">Luxery in the skies like none other</p>
+                    <a href="{% url 'route_list' %}" class="btn btn-primary btn-lg">Search Flights</a>
+                </div>
+                <div class="col-md-5 text-center d-none d-md-block">
+                    {% load static %}
+                    <img class="img-fluid" src="{% static 'jet.png' %}" alt="syberJet SJ30i">
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+ 
+    <section id="search" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-4">Search Flights</h2>
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <form action="{% url 'search_results' %}" method="GET">
+                            <div class="mb-3">
+                                <label for="route" class="form-label">Select Route</label>
+                                <select class="form-select form-select select_route" id="route" name="route" type="text" required>
+                                    <option value="" disabled selected>Select a route</option>
+                                    {% for route in routes %}
+                                        <option value="{{ route.id }}">Route to {{ route.destination }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="departureDate" class="form-label">Departure Date</label>
+                                <input type="date" class="form-control" id="departureDate" name="departureDate" required>
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="returnFlight" name="returnFlight">
+                                <label class="form-check-label" for="returnFlight">Return Flight</label>
+                            </div>
+                            
+                            <div class="mb-3" id="returnDateDive">
+                                <label for="returnDate" class="form-label">Return Date</label>
+                                <input type="date" class="form-control" id="returnDate" name="returnDate">
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">Search</button>
+                        </form>
+                    </div>
+                </div>
+        </div>
+    </section>
+    <section class="py-5 bg-primary-subtle">
+        <div class="container">
+            <h2 class="text-center mb-4">Cancel flights</h2>
+            <div class="row justify-content-center">
+                <p class="text-center text-muted">Would you like to cancel a booking?</p>
+                <div class="col-md-4 text-center">
+                    <a href="{% url 'cancel_confirm' %}" class="btn btn-primary">Cancel a Booking</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            if (!$(returnFlight).is(':checked')) {
+                $('#returnDateDive').hide();
+            }
+            console.log("Document ready!");
+            $('#returnFlight').on('change', function() {
+                if ($(this).is(':checked')) {
+                    $('#returnDateDive').show();
+                } else {
+                    $('#returnDateDive').hide();
+                    $('#returnDate').val('');
+                }
+            });
+
+            const currentDate = new Date();
+
+            $('#departureDate').change(function() {
+                var departureDate = new Date($(this).val())
+                var returnDate = new Date($('#returnDate').val());
+                if (departureDate < currentDate) {
+                    alert("Departure date cannot be before current date");
+                    $(this).val('');
+                }
+                if (departureDate > returnDate) {
+                    alert("Departure date cannot be after return date.");
+                    $(this).val('');
+                }
+            });
+
+            $('#returnDate').change(function(){
+                var departureDate = new Date($('#departureDate').val());
+                var returnDate = new Date($(this).val());
+                if (returnDate < departureDate) {
+                    alert("Return date cannot be before departure date.");
+                    $(this).val('');
+                }
+            });
+
+            function submitButton() {
+                if ($(returnFlight).is(':checked')) {
+                    if (!$('#returnDate').val()) {
+                        alert("Select a return date.");
+                        $('#submitBtn').prop('disabled', true);
+                    } else {
+                        $('#submitBtn').prop('disabled', false);
+                    }
+                } 
+            }
+
+                
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-qOJMQeF2CtPU5dVXc5C6Zz0rTkDZMU6Fd69/a0pAr9CrUuvqkCBzRLxRRtF1Gxnj" crossorigin="anonymous"></script>
+</body>
+</html>

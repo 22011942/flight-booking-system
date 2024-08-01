@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Schedules</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <style>
+            section{
+                 padding: 60px 0;
+            }
+        </style>
+    </head>
+<body>
+    <section id="search" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-4">Schedule search</h2>
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                         <div class="mb-3">
+                             <label for="route" class="form-label">Select outbound flight</label>
+                             <select class="form-select form-select select_route" id="route_departure" name="route_departure" type="text" required>
+                                 <option value="" disabled selected>Select a route</option>
+                                 {% for schedule in outbound_flights %}
+                                     <option value="{{ schedule.id }}" data-day="{{ schedule.get_day_of_week_display }}">{{ schedule.get_day_of_week_display }}: {{ schedule.departure_time }} - {{ schedule.arrival_time }}</option>
+                                 {% endfor %}
+                             </select>
+                         </div>
+
+                         <div class="mb-3">
+                             <label for="departureDate" class="form-label">Departure Date</label>
+                             <input type="date" class="form-control" id="departureDate" name="departureDate" required>
+                         </div>
+
+                         <div class="mb-3 form-check">
+                             <input type="checkbox" class="form-check-input" id="returnFlight" name="returnFlight">
+                             <label class="form-check-label" for="returnFlight">Return Flight</label>
+                         </div>
+
+                         <select class="form-select form-select select_route" id="route_return" name="route_return" type="text" required>
+                             <option value="" disabled selected>Select return flight</option>
+                             {% for schedule in return_flights %}
+                                 <option value="{{ schedule.id }}" data-day2="{{ schedule.get_day_of_week_display }}">{{ schedule.get_day_of_week_display }}: {{ schedule.departure_time }} - {{ schedule.arrival_time }}</option>
+                             {% endfor %}
+                         </select>
+                         
+                         <div class="mb-3" id="returnDateDive">
+                             <label for="returnDate" class="form-label">Return Date</label>
+                             <input type="date" class="form-control" id="returnDate" name="returnDate">
+                         </div>
+
+                         <button type="submit" class="btn btn-primary" id="submitBtn">Search</button>
+                    </div>
+                </div>
+        </div>
+    </section>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script>
+            $(document).ready(function() {
+
+                if (!$(returnFlight).is(':checked')) {
+                    $('#returnDateDive').hide();
+                    $('#route_return').hide();
+                }
+                console.log("Document ready!");
+                $('#returnFlight').on('change', function() {
+                    if ($(this).is(':checked')) {
+                        $('#returnDateDive').show();
+                        $('#route_return').show();
+                    } else {
+                        $('#returnDateDive').hide();
+                        $('#returnDate').val('');
+                        $('#route_return').hide();
+                        $('#route_return').val('');
+                    }
+                });
+    
+                const currentDate = new Date();
+    
+                $('#departureDate').change(function() {
+                    var departureDate = new Date($(this).val())
+                    var returnDate = new Date($('#returnDate').val());
+                    if (departureDate < currentDate) {
+                        alert("Departure date cannot be before current date");
+                        $(this).val('');
+                    }
+                    if (departureDate > returnDate) {
+                        alert("Departure date cannot be after return date.");
+                        $(this).val('');
+                    }
+                    var selectedDay = $('#route_departure').find(':selected').data('day');
+                    if (convertDayToNumber(selectedDay) == 8 && (departureDate.getDay() == 6 || departureDate.getDay() == 0)) {
+                        alert("Departure date must match a schedule day");
+                        $(this).val('');
+                    } else if (departureDate.getDay() != convertDayToNumber(selectedDay) && convertDayToNumber(selectedDay) != 8) {
+                        alert("Departure date must match the schedule day");
+                        $(this).val('');
+                    }
+                });
+    
+                $('#returnDate').change(function(){
+                    var departureDate = new Date($('#departureDate').val());
+                    var returnDate = new Date($(this).val());
+                    if (returnDate < departureDate) {
+                        alert("Return date cannot be before departure date.");
+                        $(this).val('');
+                    }
+                    var selectedDay = $('#route_return').find(':selected').data('day2');
+                    if (convertDayToNumber(selectedDay) == 8 && (returnDate.getDay() == 6 || returnDate.getDay() == 0)) {
+                        alert("Return date must match a schedule day");
+                        $(this).val('');
+                    } else if (returnDate.getDay() != convertDayToNumber(selectedDay) && convertDayToNumber(selectedDay) != 8) {
+                        console.log(returnDate.getDay());
+                        console.log(convertDayToNumber(selectedDay));
+                        alert("Return date must match the schedule day");
+                        $(this).val('');
+                    }
+                });
+    
+                function submitButton() {
+                    if ($(returnFlight).is(':checked')) {
+                        if (!$('#returnDate').val()) {
+                            alert("Select a return date.");
+                            $('#submitBtn').prop('disabled', true);
+                        } else {
+                            $('#submitBtn').prop('disabled', false);
+                        }
+                    } 
+                }
+
+                function convertDayToNumber(dayName) {
+                    switch(dayName) {
+                        case 'Monday':
+                            return 1;
+                        case 'Tuesday':
+                            return 2;
+                        case 'Wednesday':
+                            return 3;
+                        case 'Thursday':
+                            return 4;
+                        case 'Friday':
+                            return 5;
+                        case 'Saturday':
+                            return 6;
+                        case 'Sunday':
+                            return 0;
+                        case 'Every week day':
+                            return 8;
+                    }
+                }
+
+                var returnDate = $('#returnDate').val();
+                console.log(returnDate)
+
+                $('#submitBtn').click(function() {
+                    var outboundScheduleId = $('#route_departure').val();
+                    var departureDate = $('#departureDate').val();
+
+                    var returnFlightSelected = $('#returnFlight').prop('checked');
+                    var returnScheduleId = $('#route_return').val();
+                    var returnDate = $('#returnDate').val();
+
+
+                    var url = "/myapp/book_flight/" + outboundScheduleId + "/" + departureDate;
+
+                    if (returnFlightSelected) {
+                        url = "/myapp/book_flight/" + outboundScheduleId + "/" + returnScheduleId + "/" + departureDate + "/" + returnDate;
+                    }
+                
+                    window.location.href = url;
+                });
+                    
+            });
+        </script>
+</body>
+</html>
